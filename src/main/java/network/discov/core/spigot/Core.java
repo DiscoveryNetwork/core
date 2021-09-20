@@ -2,6 +2,7 @@ package network.discov.core.spigot;
 
 import network.discov.core.spigot.model.CoreComponent;
 import network.discov.core.spigot.util.MessageUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,6 +16,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.logging.Logger;
 
 public class Core extends JavaPlugin {
     private final List<CoreComponent> components = new ArrayList<>();
@@ -42,13 +45,14 @@ public class Core extends JavaPlugin {
     }
 
     private void logLogoLines() {
-        getLogger().info("");
-        getLogger().info("   ______              ");
-        getLogger().info("  / ____/___  ________ ");
-        getLogger().info(" / /   / __ \\/ ___/ _ \\         DiscovCore v" + getDescription().getVersion());
-        getLogger().info("/ /___/ /_/ / /  /  __/           Running on PaperSpigot");
-        getLogger().info("\\____/\\____/_/   \\___/ ");
-        getLogger().info("");
+        Logger log = Bukkit.getLogger();
+        log.info("");
+        log.info("   ______              ");
+        log.info("  / ____/___  ________ ");
+        log.info(" / /   / __ \\/ ___/ _ \\         DiscovCore v" + getDescription().getVersion());
+        log.info("/ /___/ /_/ / /  /  __/           Running on PaperSpigot");
+        log.info("\\____/\\____/_/   \\___/ ");
+        log.info("");
     }
 
     private File getComponentDirectory() {
@@ -66,7 +70,7 @@ public class Core extends JavaPlugin {
     }
 
     private void loadComponents() {
-        for (File file : getComponentDirectory().listFiles()) {
+        for (File file : Objects.requireNonNull(getComponentDirectory().listFiles())) {
             if (!file.getName().toLowerCase().contains(".jar")) { continue; }
             try {
                 URLClassLoader loader = new URLClassLoader(new URL[]{file.toURI().toURL()}, this.getClass().getClassLoader());
@@ -94,6 +98,7 @@ public class Core extends JavaPlugin {
         for (CoreComponent component : components) {
             unloadComponent(component);
         }
+        components.clear();
     }
 
     private void loadComponent(CoreComponent component) {
@@ -103,8 +108,9 @@ public class Core extends JavaPlugin {
     }
 
     private void unloadComponent(CoreComponent component) {
-        components.remove(component);
         component.onDisable();
+        component.unregisterCommands();
+        component.unregisterListeners();
         getLogger().info(String.format("Component [%s] is now disabled!", component.getName()));
     }
 

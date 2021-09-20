@@ -3,8 +3,10 @@ package network.discov.core.spigot.model;
 import network.discov.core.spigot.Core;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,19 +16,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.util.Objects;
+import java.util.*;
+import java.util.logging.Logger;
 
 public abstract class CoreComponent {
     protected String name;
     protected String version;
     private FileConfiguration configuration;
     private static CoreComponent instance;
+    private final ComponentLogger logger;
+    private final List<Command> commands = new ArrayList<>();
+    private final List<Listener> listeners = new ArrayList<>();
 
     public CoreComponent() {
         InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(getComponentFile()));
         YamlConfiguration properties = YamlConfiguration.loadConfiguration(reader);
         this.name = properties.getString("name");
         this.version = properties.getString("version");
+        this.logger = new ComponentLogger(this);
+        instance = this;
     }
 
     public static CoreComponent getInstance() {
@@ -52,17 +60,17 @@ public abstract class CoreComponent {
     private @NotNull File getConfigFile() {
         File directory = new File(Core.getInstance().getDataFolder(), "config/");
         if (directory.mkdirs()) {
-            Core.getInstance().getLogger().info("Config directory doesn't exist yet. Creating now...");
+            getLogger().info("Config directory doesn't exist yet. Creating now...");
         }
 
         File file = new File(directory, String.format("config-%s.yml", this.name.toLowerCase()));
         if (!file.exists()) {
             try {
                 if (file.createNewFile()) {
-                    Core.getInstance().getLogger().info("Creating config file for " + this.toString());
+                    getLogger().info("Creating config file...");
                 }
             } catch (IOException e) {
-                Core.getInstance().getLogger().severe("An error occurred while creating the config for " + this.toString());
+                getLogger().severe("An error occurred while creating the config file");
                 e.printStackTrace();
             }
         }
@@ -89,7 +97,7 @@ public abstract class CoreComponent {
         try {
             config.save(this.getConfigFile());
         } catch (IOException e) {
-            Core.getInstance().getLogger().severe("An error occurred while saving the config for " + this.toString());
+            getLogger().severe("An error occurred while saving the config file");
             e.printStackTrace();
         }
     }
@@ -105,27 +113,59 @@ public abstract class CoreComponent {
         this.saveConfig(config);
     }
 
-    protected void registerListener(Listener listener) {
-        Bukkit.getServer().getPluginManager().registerEvents(listener, Core.getInstance());
-    }
-
-    private CommandMap getCommandMap() {
+    private SimpleCommandMap getCommandMap() {
         try {
-            final Field bukkitCommandMap = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+            final Field bukkitCommandMap = Bukkit.getPluginManager().getClass().getDeclaredField("commandMap");
             bukkitCommandMap.setAccessible(true);
 
-            return (CommandMap) bukkitCommandMap.get(Bukkit.getServer());
+            return (SimpleCommandMap) bukkitCommandMap.get(Bukkit.getPluginManager());
         } catch (IllegalAccessException | NoSuchFieldException e) {
-            Core.getInstance().getLogger().warning("Failed to retrieve CommandMap");
+            getLogger().warning("Failed to retrieve CommandMap");
             e.printStackTrace();
         }
         return null;
     }
 
     protected void registerCommand(Command command) {
-        CommandMap commandMap = this.getCommandMap();
+        SimpleCommandMap commandMap = this.getCommandMap();
         if (commandMap != null) {
+            commands.add(command);
             commandMap.register(command.getName(), command);
+        }
+    }
+
+    public void unregisterCommands() {
+        try {
+            final Field bukkitCommandMap = Bukkit.getPluginManager().getClass().getDeclaredField("commandMap");
+            bukkitCommandMap.setAccessible(true);
+            SimpleCommandMap commandMap =  (SimpleCommandMap) bukkitCommandMap.get(Bukkit.getPluginManager());
+
+            final Field knownCommandsField = commandMap.getClass().getSuperclass().getDeclaredField("knownCommands");
+            knownCommandsField.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            HashMap<String, org.bukkit.command.Command> knownCommands = (HashMap<String, org.bukkit.command.Command>) knownCommandsField.get(commandMap);
+
+            for (Command command : commands) {
+                knownCommands.remove(command.getName());
+                for (String alias : command.getAliases()) {
+                    knownCommands.remove(alias);
+                }
+            }
+            commands.clear();
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            getLogger().warning("Failed to retrieve CommandMap");
+            e.printStackTrace();
+        }
+    }
+
+    protected void registerListener(Listener listener) {
+        listeners.add(listener);
+        Bukkit.getServer().getPluginManager().registerEvents(listener, Core.getInstance());
+    }
+
+    public void unregisterListeners() {
+        for (Listener listener : listeners) {
+            HandlerList.unregisterAll(listener);
         }
     }
 
@@ -133,15 +173,7 @@ public abstract class CoreComponent {
         Core.getInstance().getMessageUtil().registerDefault(key, message);
     }
 
-    public void logInfo(String msg) {
-        Core.getInstance().getLogger().info(String.format("[%s] %s", name, msg));
-    }
-
-    public void logWarning(String msg) {
-        Core.getInstance().getLogger().warning(String.format("[%s] %s", name, msg));
-    }
-
-    public void logSevere(String msg) {
-        Core.getInstance().getLogger().severe(String.format("[%s] %s", name, msg));
+    public Logger getLogger() {
+        return this.logger;
     }
 }

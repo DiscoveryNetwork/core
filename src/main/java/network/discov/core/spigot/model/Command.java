@@ -26,10 +26,9 @@ public abstract class Command extends BukkitCommand {
             return true;
         }
 
-        String[] commandArgs = (String[]) ArrayUtils.remove(args, 0);
-        if (commandArgs.length < arguments.size()) {
+        if (args.length < arguments.size()) {
             List<String> missingArguments = new ArrayList<>();
-            for (TabArgument argument : new ArrayList<>(arguments.values()).subList(commandArgs.length, arguments.size())) {
+            for (TabArgument argument : new ArrayList<>(arguments.values()).subList(args.length, arguments.size())) {
                 missingArguments.add(argument.getName());
             }
             String message = Core.getInstance().getMessageUtil().get("missing-arguments", missingArguments.toString());
