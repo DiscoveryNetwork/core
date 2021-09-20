@@ -1,0 +1,10 @@
+main: network.discov.core.spigot.Core
+name: DiscovCore
+description: ${description}
+version: ${version}
+api-version: 1.15
+author: ParrotLync
+commands:
+  core:
+    usage: /core
+    description: Main Core command

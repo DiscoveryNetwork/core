@@ -1,0 +1,5 @@
+main: network.discov.core.bungee.Core
+name: DiscovCore
+description: ${description}
+version: ${version}
+author: ParrotLync
