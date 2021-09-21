@@ -1,10 +1,11 @@
 package network.discov.core.spigot.model;
 
+import network.discov.core.common.CommonUtils;
 import network.discov.core.common.TabArgument;
 import network.discov.core.spigot.Core;
-import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
+import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -26,23 +27,30 @@ public abstract class Command extends BukkitCommand {
             return true;
         }
 
-        if (args.length < arguments.size()) {
-            List<String> missingArguments = new ArrayList<>();
-            for (TabArgument argument : new ArrayList<>(arguments.values()).subList(args.length, arguments.size())) {
-                missingArguments.add(argument.getName());
-            }
-            String message = Core.getInstance().getMessageUtil().get("missing-arguments", missingArguments.toString());
-            sender.sendMessage(message);
+        List<String> missingArguments = CommonUtils.getMissingArguments(args, arguments);
+        if (missingArguments.size() != 0) {
+            sender.sendMessage(CommonUtils.getArgsMessage(missingArguments, Core.getInstance().getMessageUtil()));
             return true;
         }
 
-        this.execute(sender, args);
+        this.executeCommand(sender, args);
         return true;
     }
 
-    public abstract void execute(CommandSender sender, String[] args);
+    @Override
+    public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) {
+        List<String> suggestions = new ArrayList<>();
 
-    public HashMap<Integer, TabArgument> getArguments() {
-        return arguments;
+        if (arguments.containsKey(args.length - 1)) {
+            TabArgument argument = arguments.get(args.length - 1);
+            if (argument.getPermission() != null && !sender.hasPermission(argument.getPermission())) { return suggestions; }
+            suggestions.addAll(argument.getSuggestions(sender));
+            return StringUtil.copyPartialMatches(args[0], suggestions, new ArrayList<>());
+        }
+
+        return suggestions;
     }
+
+    public abstract void executeCommand(CommandSender sender, String[] args);
+
 }

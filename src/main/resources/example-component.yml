@@ -1,2 +1,5 @@
 main: network.discov.component.transport.Transport
 name: Transport
+developers: []
+version: 1.0.0
+depend: [LuckPerms]

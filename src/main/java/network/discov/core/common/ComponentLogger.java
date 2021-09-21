@@ -1,4 +1,4 @@
-package network.discov.core.spigot.model;
+package network.discov.core.common;
 
 import network.discov.core.spigot.Core;
 import org.jetbrains.annotations.NotNull;

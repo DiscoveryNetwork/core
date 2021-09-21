@@ -1,88 +1,47 @@
 package network.discov.core.spigot.model;
 
+import network.discov.core.common.CoreComponent;
+import network.discov.core.common.MessageUtil;
+import network.discov.core.common.PersistentStorage;
 import network.discov.core.spigot.Core;
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandMap;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.util.*;
-import java.util.logging.Logger;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
-public abstract class CoreComponent {
-    protected String name;
-    protected String version;
-    private FileConfiguration configuration;
-    private static CoreComponent instance;
-    private final ComponentLogger logger;
+public abstract class SpigotComponent extends CoreComponent {
     private final List<Command> commands = new ArrayList<>();
     private final List<Listener> listeners = new ArrayList<>();
+    private FileConfiguration configuration;
 
-    public CoreComponent() {
-        InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(getComponentFile()));
+    public SpigotComponent() {
+        InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(getResourceFile("component.yml")));
         YamlConfiguration properties = YamlConfiguration.loadConfiguration(reader);
         this.name = properties.getString("name");
         this.version = properties.getString("version");
-        this.logger = new ComponentLogger(this);
-        instance = this;
-    }
-
-    public static CoreComponent getInstance() {
-        return instance;
+        setupLogger();
     }
 
     abstract public void onEnable();
     abstract public void onDisable();
 
-    public String getName() {
-        return name;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
     @Override
-    public String toString() {
-        return "CoreComponent{name='" + name + '\'' + ", version='" + version + '\'' + '}';
-    }
-
-    private @NotNull File getConfigFile() {
-        File directory = new File(Core.getInstance().getDataFolder(), "config/");
-        if (directory.mkdirs()) {
-            getLogger().info("Config directory doesn't exist yet. Creating now...");
-        }
-
-        File file = new File(directory, String.format("config-%s.yml", this.name.toLowerCase()));
-        if (!file.exists()) {
-            try {
-                if (file.createNewFile()) {
-                    getLogger().info("Creating config file...");
-                }
-            } catch (IOException e) {
-                getLogger().severe("An error occurred while creating the config file");
-                e.printStackTrace();
-            }
-        }
-        return file;
-    }
-
-    private @Nullable InputStream getResourceConfig() {
-        return this.getClass().getClassLoader().getResourceAsStream("config.yml");
-    }
-
-    private @Nullable InputStream getComponentFile() {
-        return this.getClass().getClassLoader().getResourceAsStream("component.yml");
+    protected File getCoreDataFolder() {
+        return Core.getInstance().getDataFolder();
     }
 
     protected FileConfiguration getConfig() {
@@ -93,24 +52,40 @@ public abstract class CoreComponent {
         return configuration;
     }
 
-    protected void saveConfig(FileConfiguration config) {
+    @Override
+    protected void saveConfig() {
         try {
-            config.save(this.getConfigFile());
+            configuration.save(this.getConfigFile());
         } catch (IOException e) {
             getLogger().severe("An error occurred while saving the config file");
             e.printStackTrace();
         }
     }
 
+    @Override
+    protected void saveDefaultConfig() {
+        File file = getConfigFile();
+        if (file.length() == 0) {
+            try (InputStream in = getResourceFile("config.yml")) {
+                assert in != null;
+                Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        getConfig();
+    }
+
+    @Override
     protected void reloadConfig() {
         FileConfiguration config = this.getConfig();
-        InputStream resourceConfig = getResourceConfig();
+        InputStream resourceConfig = getResourceFile("config.yml");
         if (resourceConfig != null) {
             InputStreamReader reader = new InputStreamReader(resourceConfig);
             config.setDefaults(YamlConfiguration.loadConfiguration(reader));
         }
         this.configuration = config;
-        this.saveConfig(config);
+        saveConfig();
     }
 
     private SimpleCommandMap getCommandMap() {
@@ -127,13 +102,23 @@ public abstract class CoreComponent {
     }
 
     protected void registerCommand(Command command) {
-        SimpleCommandMap commandMap = this.getCommandMap();
-        if (commandMap != null) {
-            commands.add(command);
-            commandMap.register(command.getName(), command);
+        if (!commands.contains(command)) {
+            SimpleCommandMap commandMap = this.getCommandMap();
+            if (commandMap != null) {
+                commands.add(command);
+                commandMap.register(command.getName(), command);
+            }
         }
     }
 
+    protected void registerListener(Listener listener) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener);
+            Bukkit.getServer().getPluginManager().registerEvents(listener, Core.getInstance());
+        }
+    }
+
+    @Override
     public void unregisterCommands() {
         try {
             final Field bukkitCommandMap = Bukkit.getPluginManager().getClass().getDeclaredField("commandMap");
@@ -158,22 +143,31 @@ public abstract class CoreComponent {
         }
     }
 
-    protected void registerListener(Listener listener) {
-        listeners.add(listener);
-        Bukkit.getServer().getPluginManager().registerEvents(listener, Core.getInstance());
-    }
-
+    @Override
     public void unregisterListeners() {
         for (Listener listener : listeners) {
             HandlerList.unregisterAll(listener);
         }
+        listeners.clear();
     }
 
+    @Override
+    protected PersistentStorage getPersistentStorage() {
+        return Core.getInstance().getPersistentStorage();
+    }
+
+    @Override
+    public String getMessage(String key, boolean global, String... args) {
+        String msgKey = global ? key : getKey(key);
+        return Core.getInstance().getMessageUtil().get(msgKey, args);
+    }
+
+    @Override
     protected void addDefaultMessage(String key, String message) {
-        Core.getInstance().getMessageUtil().registerDefault(key, message);
+        Core.getInstance().getMessageUtil().registerDefault(getKey(key), message);
     }
 
-    public Logger getLogger() {
-        return this.logger;
+    private String getKey(String key) {
+        return String.format("%s.%s", name.toLowerCase(), key);
     }
 }

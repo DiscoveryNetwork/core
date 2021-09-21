@@ -6,12 +6,28 @@ import java.util.Arrays;
 import java.util.List;
 
 public abstract class TabArgument {
-    protected String name;
+    private final String name;
+    private final String permission;
+    private final boolean required;
+
+    public TabArgument(String name, String permission, boolean required) {
+        this.name = name;
+        this.permission = permission;
+        this.required = required;
+    }
 
     public abstract List<String> getSuggestions(CommandSender sender);
 
     public String getName() {
         return name;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+
+    public boolean isRequired() {
+        return  required;
     }
 
     @Override
@@ -21,15 +37,3 @@ public abstract class TabArgument {
 }
 
 
-class StringTabArgument extends TabArgument {
-    private final List<String> options;
-
-    public StringTabArgument(String[] options) {
-        this.options = Arrays.asList(options);
-    }
-
-    @Override
-    public List<String> getSuggestions(CommandSender sender) {
-        return options;
-    }
-}
