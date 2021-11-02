@@ -1,0 +1,11 @@
+server-name:
+nexus-auth:
+database:
+  host:
+  database:
+  username:
+  password:
+redis:
+  host:
+  port:
+  password:
