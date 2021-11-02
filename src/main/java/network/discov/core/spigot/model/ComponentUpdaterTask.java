@@ -33,19 +33,19 @@ public class ComponentUpdaterTask implements Runnable {
             String name = file.split("-")[0];
 
             if (file.contains("SNAPSHOT") && !updateSnapshots) {
-                logger.info(String.format("Component [%s] is running on a SNAPSHOT version! Run /core updater --forceSnapshots", name));
+                logger.info(String.format("Component [%s] is running on a SNAPSHOT version! Run /core updater --forceSnapshots to update snapshot versions.", name));
                 continue;
             }
 
             try {
-                String latestVersion = NexusClient.getLatestVersion("discov-components", name, authString);
+                String latestVersion = NexusClient.getLatestVersion("core-components", name, authString);
                 if (file.equalsIgnoreCase(latestVersion)) {
                     logger.info(String.format("Component [%s] is already running the latest release.", name));
                     continue;
                 }
 
                 logger.info("Component [%s] is not running the latest release. Performing update now...");
-                NexusClient.downloadFile("plugins/DiscovCore/components", "discov-components", name, authString);
+                NexusClient.downloadFile("plugins/DiscovCore/components", "core-components", name, authString);
                 if (Core.getInstance().unloadComponent(name)) {
                     deleteComponent(component);
                 } else {

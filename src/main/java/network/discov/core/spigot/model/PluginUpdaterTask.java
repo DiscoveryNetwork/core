@@ -38,7 +38,7 @@ public class PluginUpdaterTask implements Runnable {
             String name = file.split("-")[0];
 
             if (file.contains("SNAPSHOT") && !updateSnapshots) {
-                logger.info(String.format("Plugin [%s] is running on a SNAPSHOT version! Run /core updater --forceSnapshots", name));
+                logger.info(String.format("Plugin [%s] is running on a SNAPSHOT version! Run /core updater --forceSnapshots to update snapshot versions.", name));
                 continue;
             }
 
