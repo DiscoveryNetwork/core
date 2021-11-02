@@ -11,5 +11,6 @@ public class CoreCommandExecutor extends CommandExecutor {
 
         commands.put("reload", new ReloadCommand());
         commands.put("updater", new UpdaterCommand());
+        commands.put("install", new InstallCommand());
     }
 }

@@ -1,9 +1,7 @@
 package network.discov.core.spigot;
 
-import network.discov.core.common.CommonUtils;
-import network.discov.core.common.DatabaseConnector;
-import network.discov.core.common.MessageUtil;
-import network.discov.core.common.PersistentStorage;
+import network.discov.core.common.*;
+import network.discov.core.common.exception.InvalidResponseCodeException;
 import network.discov.core.spigot.command.CoreCommandExecutor;
 import network.discov.core.spigot.model.ComponentUpdaterTask;
 import network.discov.core.spigot.model.PluginUpdaterTask;
@@ -15,6 +13,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -29,6 +28,7 @@ import java.util.Objects;
 public class Core extends JavaPlugin {
     private final List<SpigotComponent> components = new ArrayList<>();
     private final MessageUtil messageUtil = new SpigotMessageUtil();
+    private final List<String> availableComponents = new ArrayList<>();
     private PersistentStorage persistentStorage;
     private DatabaseConnector databaseConnector;
     private static Core instance;
@@ -44,6 +44,7 @@ public class Core extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         CommonUtils.logCoreLines(Bukkit.getLogger(), getDescription().getVersion(), getServer().getName(), getServer().getVersion());
+        fetchAvailableComponents();
         initPersistentStorage();
         initDatabase();
         Objects.requireNonNull(getCommand("core")).setExecutor(new CoreCommandExecutor());
@@ -66,10 +67,27 @@ public class Core extends JavaPlugin {
     }
 
     public void reload() {
+        fetchAvailableComponents();
         reloadConfig();
         unloadComponents();
         loadComponents();
         getLogger().info("Core config & components were reloaded.");
+    }
+
+    private void fetchAvailableComponents() {
+        String authString = getConfig().getString("nexus-auth");
+        assert authString != null;
+
+        try {
+            List<String> names = NexusClient.getAvailableComponents("core-components", authString);
+            for (String name : names) {
+                if (!availableComponents.contains(name)) {
+                    availableComponents.add(name);
+                }
+            }
+        } catch (IOException | ParseException | InvalidResponseCodeException e) {
+            getLogger().warning(e.getMessage());
+        }
     }
 
     private void initPersistentStorage() {
@@ -153,6 +171,8 @@ public class Core extends JavaPlugin {
     }
 
     private void loadComponent(SpigotComponent component) {
+        availableComponents.remove(component.getName());
+
         try {
             component.onEnable();
             components.add(component);
@@ -189,6 +209,17 @@ public class Core extends JavaPlugin {
         return names;
     }
 
+    public boolean loadComponent(String path) {
+        File file = new File(path);
+        try {
+            doLoadComponent(file);
+        } catch (ClassNotFoundException | MalformedURLException | NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     public boolean unloadComponent(String name) {
         SpigotComponent component = getSpigotComponent(name);
         if (component == null) { return false; }
@@ -208,6 +239,10 @@ public class Core extends JavaPlugin {
 
     public void updateComponents(boolean forceSnapshots) {
         getServer().getScheduler().runTaskAsynchronously(this, new ComponentUpdaterTask(components, forceSnapshots));
+    }
+
+    public List<String> getAvailableComponents() {
+        return availableComponents;
     }
 
     public String getServerName() {
