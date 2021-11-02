@@ -40,10 +40,10 @@ public abstract class Command extends BukkitCommand {
     @Override
     public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) {
         List<String> suggestions = new ArrayList<>();
+        if (getPermission() != null && !sender.hasPermission(getPermission())) { return suggestions; }
 
         if (arguments.containsKey(args.length - 1)) {
             TabArgument argument = arguments.get(args.length - 1);
-            if (argument.getPermission() != null && !sender.hasPermission(argument.getPermission())) { return suggestions; }
             suggestions.addAll(argument.getSuggestions(sender));
             return StringUtil.copyPartialMatches(args[0], suggestions, new ArrayList<>());
         }

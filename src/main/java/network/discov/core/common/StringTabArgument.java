@@ -8,8 +8,8 @@ import java.util.List;
 public class StringTabArgument extends TabArgument {
     private final List<String> options;
 
-    public StringTabArgument(String name, String permission, boolean required, String[] options) {
-        super(name, permission, required);
+    public StringTabArgument(String name, boolean required, String[] options) {
+        super(name, required);
         this.options = Arrays.asList(options);
     }
 

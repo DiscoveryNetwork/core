@@ -2,12 +2,12 @@ package network.discov.core.bungee.model;
 
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
+import network.discov.core.bungee.Core;
 import network.discov.core.common.CommonUtils;
 import network.discov.core.common.TabArgument;
-import network.discov.core.bungee.Core;
 
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.Objects;
 
 public abstract class Command extends net.md_5.bungee.api.plugin.Command {
     protected HashMap<Integer, TabArgument> arguments = new HashMap<>();

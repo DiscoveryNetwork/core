@@ -2,7 +2,6 @@ package network.discov.core.spigot.util;
 
 import network.discov.core.common.MessageUtil;
 import network.discov.core.spigot.Core;
-import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -10,10 +9,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 
 public class SpigotMessageUtil extends MessageUtil {
-    YamlConfiguration messages;
+    private YamlConfiguration messages;
 
     public void registerDefault(@NotNull String key, @NotNull String message) {
         if (messages.contains(key)) { return; }
@@ -21,11 +19,11 @@ public class SpigotMessageUtil extends MessageUtil {
         save();
     }
 
-    public String get(@NotNull String key, String... args) {
+    public String get(@NotNull String key, Object... args) {
         if (messages.contains(key)) {
             String message = messages.getString(key);
             if (message == null) { return ""; }
-            message = String.format(message, (Object[]) args);
+            message = String.format(message, args);
             return ChatColor.translateAlternateColorCodes('&', message);
         }
 

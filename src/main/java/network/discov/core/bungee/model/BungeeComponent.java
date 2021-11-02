@@ -8,24 +8,26 @@ import net.md_5.bungee.config.YamlConfiguration;
 import network.discov.core.bungee.Core;
 import network.discov.core.common.CoreComponent;
 import network.discov.core.common.PersistentStorage;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BungeeComponent extends CoreComponent {
     private final List<Command> commands = new ArrayList<>();
     private final List<Listener> listeners = new ArrayList<>();
+    private final Scheduler scheduler;
     private Configuration configuration;
 
     public BungeeComponent() {
+        super(Core.getInstance().getLogger());
         Configuration properties = ConfigurationProvider.getProvider(YamlConfiguration.class).load(getResourceFile("component-bungee.yml"));
         this.name = properties.getString("name");
         this.version = properties.getString("version");
-        setupLogger();
+        this.scheduler = new Scheduler();
     }
 
     abstract public void onEnable();
@@ -60,16 +62,9 @@ public abstract class BungeeComponent extends CoreComponent {
     }
 
     @Override
-    protected void saveDefaultConfig() {
-        File file = getConfigFile();
-        if (!file.exists()) {
-            try (InputStream in = getResourceFile("config-bungee.yml")) {
-                assert in != null;
-                Files.copy(in, file.toPath());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+    public void saveDefaultConfig(@NotNull InputStream stream) {
+        super.saveDefaultConfig(stream);
+        getConfig();
     }
 
     @Override
@@ -122,18 +117,31 @@ public abstract class BungeeComponent extends CoreComponent {
         listeners.clear();
     }
 
+    public Scheduler getScheduler() {
+        return scheduler;
+    }
+
     @Override
     protected PersistentStorage getPersistentStorage() {
         return Core.getInstance().getPersistentStorage();
     }
 
     @Override
-    public String getMessage(String key, boolean global, String... args) {
+    public String getMessage(String key, Object... args) {
+        return Core.getInstance().getMessageUtil().get(getKey(key), args);
+    }
+
+    @Override
+    public String getGlobalMessage(String key, Object... args) {
         return Core.getInstance().getMessageUtil().get(key, args);
     }
 
     @Override
     protected void addDefaultMessage(String key, String message) {
-        Core.getInstance().getMessageUtil().registerDefault(key, message);
+        Core.getInstance().getMessageUtil().registerDefault(getKey(key), message);
+    }
+
+    private String getKey(String key) {
+        return String.format("%s.%s", name.toLowerCase(), key);
     }
 }

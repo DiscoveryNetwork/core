@@ -1,12 +1,18 @@
 package network.discov.core.common;
 
 import network.discov.core.spigot.Core;
+import org.jetbrains.annotations.NotNull;
 import redis.clients.jedis.Jedis;
 
 import java.util.UUID;
 
 public class PersistentStorage {
-    private final Jedis connection = new Jedis("81.169.227.155", 7060);
+    private final Jedis connection;
+
+    public PersistentStorage(String host, int port, String password) {
+        connection = new Jedis(host, port);
+        connection.auth(password);
+    }
 
     public String getValue(String key) {
         return connection.get(key);

@@ -1,15 +1,14 @@
 package network.discov.core.common;
 
-import network.discov.core.spigot.Core;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ComponentLogger extends Logger {
-    public ComponentLogger(@NotNull CoreComponent context) {
+    public ComponentLogger(@NotNull CoreComponent context, Logger parent) {
         super(context.getName(), null);
-        this.setParent(Core.getInstance().getLogger());
+        this.setParent(parent);
         this.setLevel(Level.ALL);
     }
 }

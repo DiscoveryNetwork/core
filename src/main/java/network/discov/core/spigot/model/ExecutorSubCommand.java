@@ -5,12 +5,12 @@ import org.bukkit.command.CommandSender;
 
 import java.util.HashMap;
 
-public abstract class CoreCommand {
+public abstract class ExecutorSubCommand {
     protected String description;
     protected String permission;
     protected HashMap<Integer, TabArgument> arguments = new HashMap<>();
 
-    public CoreCommand(String description, String permission) {
+    public ExecutorSubCommand(String description, String permission) {
         this.description = description;
         this.permission = permission;
     }

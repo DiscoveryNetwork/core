@@ -7,7 +7,7 @@ import java.io.File;
 public abstract class MessageUtil {
     abstract public void registerDefault(@NotNull String key, @NotNull String message);
 
-    abstract public String get(@NotNull String key, String... args);
+    abstract public String get(@NotNull String key, Object... args);
 
     protected abstract File getFile();
 

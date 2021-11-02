@@ -19,7 +19,7 @@
     <distributionManagement>
         <repository>
             <id>nexus-discov</id>
-            <url>https://nexus.discov.network/repository/maven-releases/</url>
+            <url>https://nexus.discov.network/repository/discov-plugins/</url>
         </repository>
     </distributionManagement>
 
@@ -62,6 +62,11 @@
             <artifactId>jedis</artifactId>
             <version>3.6.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -83,7 +88,11 @@
                     <relocations>
                         <relocation>
                             <pattern>redis.clients</pattern>
-                            <shadedPattern>network.discov.core.dependencies</shadedPattern>
+                            <shadedPattern>network.discov.core.dependencies.redis</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.json.simple</pattern>
+                            <shadedPattern>network.discov.core.dependencies.json</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

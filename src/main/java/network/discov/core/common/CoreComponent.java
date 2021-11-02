@@ -6,54 +6,83 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.logging.Logger;
 
 public abstract class CoreComponent {
     protected String name;
     protected String version;
-    private ComponentLogger logger;
+    protected List<String> developers;
+    private final ComponentLogger logger;
+
+    public CoreComponent(Logger parentLogger) {
+        logger = new ComponentLogger(this, parentLogger);
+    }
 
     abstract public void onEnable();
     abstract public void onDisable();
 
     abstract protected File getCoreDataFolder();
-
     abstract protected void saveConfig();
-    abstract protected void saveDefaultConfig();
     abstract protected void reloadConfig();
     abstract protected void unregisterCommands();
     abstract protected void unregisterListeners();
-
     abstract protected PersistentStorage getPersistentStorage();
-
     abstract protected void addDefaultMessage(String key, String message);
 
-    protected void setupLogger() {
-        assert logger == null;
-        logger = new ComponentLogger(this);
-    }
-
     protected @Nullable InputStream getResourceFile(String fileName) {
-        return getClass().getClassLoader().getResourceAsStream(fileName);
+        return this.getClass().getClassLoader().getResourceAsStream(fileName);
     }
 
-    protected @NotNull File getConfigFile() {
-        File directory = new File(getCoreDataFolder(), "config/");
-        if (directory.mkdirs()) {
-            getLogger().info("Config directory doesn't exist yet. Creating now...");
+    public void saveDefaultConfig(@NotNull InputStream stream) {
+        File file = getConfigFile();
+        if (file.length() == 0) {
+            try {
+                Files.copy(stream, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+    }
 
-        File file = new File(directory, String.format("config-%s.yml", this.name.toLowerCase()));
+    private @NotNull File getDataFolder() {
+        File directory = new File(getCoreDataFolder(), String.format("data/%s/", name.toLowerCase()));
+        if (directory.mkdirs()) {
+            getLogger().info("Data directory doesn't exist yet. Creating now...");
+        }
+        return directory;
+    }
+
+    private @NotNull File getFile(String fileName) {
+        File dataFolder = getDataFolder();
+        File file = new File(dataFolder, fileName);
         if (!file.exists()) {
             try {
                 if (file.createNewFile()) {
-                    getLogger().info("Creating config file...");
+                    getLogger().info(String.format("Creating file %s...", fileName));
                 }
             } catch (IOException e) {
-                getLogger().severe("An error occurred while creating the config file");
+                getLogger().severe(String.format("An error occurred while creating the file %s", fileName));
                 e.printStackTrace();
             }
         }
         return file;
+    }
+
+    protected @NotNull File getConfigFile() {
+        return getFile("config.yml");
+    }
+
+    protected <T> void saveObjectToFile(String fileName, T object) {
+        File file = getFile(fileName);
+        DataUtil.saveObjectToPath(object, file.getPath());
+    }
+
+    protected <T> T loadObjectFromFile(String fileName) {
+        File file = getFile(fileName);
+        return DataUtil.loadObjectFromPath(file.getPath());
     }
 
     public String getName() {
@@ -64,9 +93,14 @@ public abstract class CoreComponent {
         return version;
     }
 
-    public abstract String getMessage(String key, boolean global, String... args);
+    public List<String> getDevelopers() {
+        return developers;
+    }
 
-    protected ComponentLogger getLogger() {
+    public abstract String getMessage(String key, Object... args);
+    public abstract String getGlobalMessage(String key, Object... args);
+
+    public ComponentLogger getLogger() {
         return logger;
     }
 

@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerTabArgument extends TabArgument {
-    public PlayerTabArgument(String permission, boolean required) {
-        super("player", permission, required);
+    public PlayerTabArgument(boolean required) {
+        super("player", required);
     }
 
     @Override

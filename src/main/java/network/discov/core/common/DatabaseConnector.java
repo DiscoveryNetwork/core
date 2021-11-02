@@ -23,6 +23,23 @@ public class DatabaseConnector {
         }
     }
 
+    public void closeConnection() throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+        }
+    }
+
+    public PreparedStatement prepareStatement(String query) throws SQLException, ClassNotFoundException {
+        ensureConnection();
+        return connection.prepareStatement(query);
+    }
+
+    public int executeUpdate(String query) throws SQLException, ClassNotFoundException {
+        ensureConnection();
+        Statement statement = connection.createStatement();
+        return statement.executeUpdate(query);
+    }
+
     public ResultSet executeStatement(String query) throws SQLException, ClassNotFoundException {
         ensureConnection();
         Statement statement = connection.createStatement();
