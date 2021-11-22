@@ -49,7 +49,7 @@ public class PluginUpdaterTask implements Runnable {
                     continue;
                 }
 
-                logger.info("Plugin [%s] is not running the latest release. Performing update now...");
+                logger.info(String.format("Plugin [%s] is not running the latest release. Performing update now...", name));
                 NexusClient.downloadFile("plugins", "discov-plugins", name, authString);
                 PluginUtil.unload(name);
                 deletePlugin(plugin);

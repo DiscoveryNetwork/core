@@ -44,7 +44,7 @@ public class ComponentUpdaterTask implements Runnable {
                     continue;
                 }
 
-                logger.info("Component [%s] is not running the latest release. Performing update now...");
+                logger.info(String.format("Component [%s] is not running the latest release. Performing update now...", name));
                 NexusClient.downloadFile("plugins/DiscovCore/components", "core-components", name, authString);
                 if (Core.getInstance().unloadComponent(name)) {
                     deleteComponent(component);
