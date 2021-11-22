@@ -1,8 +1,8 @@
 package network.discov.core.spigot.model;
 
-import network.discov.core.common.CommonUtils;
 import network.discov.core.common.TabArgument;
 import network.discov.core.spigot.Core;
+import network.discov.core.spigot.util.ArgsValidator;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.util.StringUtil;
@@ -22,17 +22,18 @@ public abstract class Command extends BukkitCommand {
 
     @Override
     public boolean execute(@NotNull CommandSender sender, @NotNull String s, @NotNull String[] args) {
+        // Permission check
         if (!sender.hasPermission(Objects.requireNonNull(getPermission()))) {
             sender.sendMessage(Core.getInstance().getMessageUtil().get("no-permission"));
             return true;
         }
 
-        List<String> missingArguments = CommonUtils.getMissingArguments(args, arguments);
-        if (missingArguments.size() != 0) {
-            sender.sendMessage(CommonUtils.getArgsMessage(missingArguments, Core.getInstance().getMessageUtil()));
+        // Check if there are missing arguments & call validators
+        if (!ArgsValidator.checkArgs(sender, arguments, args)) {
             return true;
         }
 
+        // Execute the command
         this.executeCommand(sender, args);
         return true;
     }

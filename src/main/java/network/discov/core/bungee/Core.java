@@ -86,6 +86,7 @@ public class Core extends Plugin {
 
     private void loadDefaultMessages() {
         messageUtil.registerDefault("missing-arguments", "&cThe following arguments are missing: &7%s");
+        messageUtil.registerDefault("validator-failed", "&cOne or more argument validators failed.");
         messageUtil.registerDefault("player-only", "&cYou need to be a player to execute that command!");
         messageUtil.registerDefault("no-permission", "&cYou don't have permission to execute this command");
     }

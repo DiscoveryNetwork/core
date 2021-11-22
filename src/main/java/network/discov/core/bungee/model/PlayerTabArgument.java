@@ -1,22 +1,23 @@
-package network.discov.core.spigot.model;
+package network.discov.core.bungee.model;
 
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import network.discov.core.common.TabArgument;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerTabArgument extends TabArgument {
-    public PlayerTabArgument(boolean required) {
-        super("player", required);
+
+    public PlayerTabArgument(String name, boolean required) {
+        super(name, required);
     }
 
     @Override
     public List<String> getSuggestions(CommandSender sender) {
         List<String> suggestions = new ArrayList<>();
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
             suggestions.add(player.getName());
         }
         return suggestions;
@@ -24,7 +25,7 @@ public class PlayerTabArgument extends TabArgument {
 
     @Override
     public boolean isValid(String arg) {
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
             if (player.getName().equalsIgnoreCase(arg)) {
                 return true;
             }

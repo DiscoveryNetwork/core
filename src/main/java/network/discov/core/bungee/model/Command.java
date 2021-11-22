@@ -3,7 +3,7 @@ package network.discov.core.bungee.model;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import network.discov.core.bungee.Core;
-import network.discov.core.common.CommonUtils;
+import network.discov.core.bungee.util.ArgsValidator;
 import network.discov.core.common.TabArgument;
 
 import java.util.HashMap;
@@ -20,15 +20,14 @@ public abstract class Command extends net.md_5.bungee.api.plugin.Command {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+        // Permission check
         if (!sender.hasPermission(Objects.requireNonNull(getPermission()))) {
             sender.sendMessage(TextComponent.fromLegacyText(Core.getInstance().getMessageUtil().get("no-permission")));
             return;
         }
 
-        if (args.length < arguments.size()) {
-            //TODO: Do this better, like the spigot one
-            String message = CommonUtils.getArgsMessage(CommonUtils.getMissingArguments(args, arguments), Core.getInstance().getMessageUtil());
-            sender.sendMessage(TextComponent.fromLegacyText(message));
+        // Check if there are missing arguments & call validators
+        if (!ArgsValidator.checkArgs(sender, arguments, args)) {
             return;
         }
 

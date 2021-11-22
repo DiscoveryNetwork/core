@@ -14,6 +14,15 @@ public class StringTabArgument extends TabArgument {
     }
 
     @Override
+    public boolean isValid(String arg) {
+        if (!required) {
+            return true;
+        }
+
+        return options.contains(arg);
+    }
+
+    @Override
     public List<String> getSuggestions(CommandSender sender) {
         return options;
     }

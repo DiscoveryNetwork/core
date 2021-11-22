@@ -1,15 +1,17 @@
 package network.discov.core.spigot.model;
 
-import network.discov.core.common.CommonUtils;
 import network.discov.core.common.TabArgument;
 import network.discov.core.spigot.Core;
+import network.discov.core.spigot.util.ArgsValidator;
 import network.discov.core.spigot.util.TabCompleter;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TreeMap;
 
 public abstract class ComponentCommandExecutor extends BukkitCommand {
     protected final TreeMap<String, ExecutorSubCommand> commands = new TreeMap<>();
@@ -34,24 +36,23 @@ public abstract class ComponentCommandExecutor extends BukkitCommand {
             return help(sender);
         }
 
+        // Check if the given subcommand is valid
         ExecutorSubCommand subCommand = commands.get(args[0]);
         if (subCommand == null) {
             sender.sendMessage(Core.getInstance().getMessageUtil().get("subcommand-not-found", getName()));
             return true;
         }
 
+        // Permission check
         if (!sender.hasPermission(subCommand.getPermission())) {
             sender.sendMessage(Core.getInstance().getMessageUtil().get("no-permission"));
             return true;
         }
 
+        // Check if there are missing arguments & call validators
         String[] commandArgs = (String[]) ArrayUtils.remove(args, 0);
-        if (commandArgs.length < subCommand.getArguments().size()) {
-            List<String> missingArguments = CommonUtils.getMissingArguments(commandArgs, subCommand.getArguments());
-            if (missingArguments.size() != 0) {
-                sender.sendMessage(CommonUtils.getArgsMessage(missingArguments, Core.getInstance().getMessageUtil()));
-                return true;
-            }
+        if (!ArgsValidator.checkArgs(sender, subCommand.getArguments(), commandArgs)) {
+            return true;
         }
 
         subCommand.execute(sender, commandArgs);
@@ -63,7 +64,7 @@ public abstract class ComponentCommandExecutor extends BukkitCommand {
         return TabCompleter.getSuggestions(sender, args, commands);
     }
 
-    private boolean help(CommandSender sender) {
+    private boolean help(@NotNull CommandSender sender) {
         sender.sendMessage(String.format("§f+---+ §9%s §f+---+", getName()));
         int allowed = 0;
         for (String commandName : commands.keySet()) {

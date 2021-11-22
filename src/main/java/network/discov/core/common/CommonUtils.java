@@ -1,8 +1,8 @@
 package network.discov.core.common;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class CommonUtils {
@@ -10,7 +10,7 @@ public class CommonUtils {
         return messageUtil.get("missing-arguments", missingArguments.toString());
     }
 
-    public static List<String> getMissingArguments(String[] args, HashMap<Integer, TabArgument> tabArguments) {
+    public static List<String> getMissingArguments(String[] args, Map<Integer, TabArgument> tabArguments) {
         List<String> missingArguments = new ArrayList<>();
         for (TabArgument argument : new ArrayList<>(tabArguments.values()).subList(args.length, tabArguments.size())) {
             if (argument.isRequired()) { missingArguments.add(argument.getName()); }

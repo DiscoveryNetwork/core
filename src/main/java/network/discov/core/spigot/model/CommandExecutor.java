@@ -1,8 +1,8 @@
 package network.discov.core.spigot.model;
 
-import network.discov.core.common.CommonUtils;
 import network.discov.core.common.TabArgument;
 import network.discov.core.spigot.Core;
+import network.discov.core.spigot.util.ArgsValidator;
 import network.discov.core.spigot.util.TabCompleter;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.command.Command;
@@ -10,7 +10,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TreeMap;
@@ -41,26 +40,26 @@ public abstract class CommandExecutor implements TabExecutor {
             return help(sender);
         }
 
+        // Check if subcommand is valid
         ExecutorSubCommand subCommand = commands.get(args[0]);
         if (subCommand == null) {
             sender.sendMessage(Core.getInstance().getMessageUtil().get("subcommand-not-found", main));
             return true;
         }
 
+        // Permission check
         if (!sender.hasPermission(subCommand.getPermission())) {
             sender.sendMessage(Core.getInstance().getMessageUtil().get("no-permission"));
             return true;
         }
 
+        // Check if there are missing arguments & call validators
         String[] commandArgs = (String[]) ArrayUtils.remove(args, 0);
-        if (commandArgs.length < subCommand.getArguments().size()) {
-            List<String> missingArguments = CommonUtils.getMissingArguments(commandArgs, subCommand.getArguments());
-            if (missingArguments.size() != 0) {
-                sender.sendMessage(CommonUtils.getArgsMessage(missingArguments, Core.getInstance().getMessageUtil()));
-                return true;
-            }
+        if (!ArgsValidator.checkArgs(sender, subCommand.getArguments(), commandArgs)) {
+            return true;
         }
 
+        // Execute the command
         subCommand.execute(sender, commandArgs);
         return true;
     }

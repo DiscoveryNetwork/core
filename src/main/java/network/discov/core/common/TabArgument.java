@@ -6,7 +6,7 @@ import java.util.List;
 
 public abstract class TabArgument {
     private final String name;
-    private final boolean required;
+    protected final boolean required;
 
     public TabArgument(String name, boolean required) {
         this.name = name;
@@ -21,6 +21,10 @@ public abstract class TabArgument {
 
     public boolean isRequired() {
         return  required;
+    }
+
+    public boolean isValid(String arg) {
+        return true;
     }
 
     @Override
