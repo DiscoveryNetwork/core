@@ -18,7 +18,7 @@ public class DatabaseConnector {
 
         synchronized (this) {
             if (connection != null && !connection.isClosed()) { return; }
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection(String.format("jdbc:mysql://%s:%d/%s?autoReconnect=true&useSSL=false", host, 3306, database), username, password);
         }
     }
