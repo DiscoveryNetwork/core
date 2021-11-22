@@ -1,7 +1,6 @@
 package network.discov.core.common;
 
 import network.discov.core.spigot.Core;
-import org.jetbrains.annotations.NotNull;
 import redis.clients.jedis.Jedis;
 
 import java.util.UUID;
