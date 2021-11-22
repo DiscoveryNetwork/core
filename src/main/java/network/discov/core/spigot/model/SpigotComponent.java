@@ -26,11 +26,10 @@ public abstract class SpigotComponent extends CoreComponent {
     private final Scheduler scheduler;
     private FileConfiguration configuration;
 
-    public SpigotComponent() {
-        super(Core.getInstance().getLogger());
+    public SpigotComponent(String name) {
+        super(name, Core.getInstance().getLogger());
         InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(getResourceFile("component.yml")));
         YamlConfiguration properties = YamlConfiguration.loadConfiguration(reader);
-        this.name = properties.getString("name");
         this.version = properties.getString("version");
         this.developers = properties.getStringList("developers");
         this.scheduler = new Scheduler();
