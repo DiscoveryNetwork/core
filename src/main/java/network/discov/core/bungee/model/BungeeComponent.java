@@ -22,8 +22,8 @@ public abstract class BungeeComponent extends CoreComponent {
     private final Scheduler scheduler;
     private Configuration configuration;
 
-    public BungeeComponent() {
-        super(Core.getInstance().getLogger());
+    public BungeeComponent(String name) {
+        super(name, Core.getInstance().getLogger());
         Configuration properties = ConfigurationProvider.getProvider(YamlConfiguration.class).load(getResourceFile("component-bungee.yml"));
         this.name = properties.getString("name");
         this.version = properties.getString("version");
