@@ -17,7 +17,8 @@ public abstract class CoreComponent {
     protected List<String> developers;
     private final ComponentLogger logger;
 
-    public CoreComponent(Logger parentLogger) {
+    public CoreComponent(String name, Logger parentLogger) {
+        this.name = name;
         logger = new ComponentLogger(this, parentLogger);
     }
 
