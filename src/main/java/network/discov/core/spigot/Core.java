@@ -1,5 +1,6 @@
 package network.discov.core.spigot;
 
+import com.google.common.collect.Iterables;
 import network.discov.core.common.*;
 import network.discov.core.common.exception.InvalidResponseCodeException;
 import network.discov.core.spigot.command.CoreCommandExecutor;
@@ -10,6 +11,7 @@ import network.discov.core.spigot.util.SpigotMessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,6 +46,7 @@ public class Core extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         CommonUtils.logCoreLines(Bukkit.getLogger(), getDescription().getVersion(), getServer().getName(), getServer().getVersion());
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "core:broadcast");
         fetchAvailableComponents();
         initPersistentStorage();
         initDatabase();
@@ -54,6 +57,7 @@ public class Core extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        getServer().getMessenger().unregisterOutgoingPluginChannel(this);
         new PluginUpdaterTask(false).run();
         new ComponentUpdaterTask(components, false).run();
         unloadComponents();
@@ -144,7 +148,7 @@ public class Core extends JavaPlugin {
         InputStream componentStream = loader.getResourceAsStream("component.yml");
 
         if (componentStream != null) {
-            FileConfiguration componentFile = YamlConfiguration.loadConfiguration(new InputStreamReader(componentStream ));
+            YamlConfiguration componentFile = YamlConfiguration.loadConfiguration(new InputStreamReader(componentStream ));
             for (String plugin : componentFile.getStringList("depend")) {
                 if (getServer().getPluginManager().getPlugin(plugin) == null || !getServer().getPluginManager().isPluginEnabled(plugin)) {
                     String message = String.format("%s depends on %s, but dependency was not found. Cancelled loading.", componentFile.getString("name"), plugin);
@@ -239,6 +243,21 @@ public class Core extends JavaPlugin {
 
     public void updateComponents(boolean forceSnapshots) {
         getServer().getScheduler().runTaskAsynchronously(this, new ComponentUpdaterTask(components, forceSnapshots));
+    }
+
+    public void broadcast(@NotNull String message, String permission) {
+        Player player = Iterables.get(Bukkit.getOnlinePlayers(), 0);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+
+        try {
+            dataOutputStream.writeUTF(message);
+            dataOutputStream.writeUTF(permission);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        player.sendPluginMessage(this, "core:broadcast", byteArrayOutputStream.toByteArray());
     }
 
     public List<String> getAvailableComponents() {
