@@ -3,6 +3,7 @@ package network.discov.core.bungee.model;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,12 +24,12 @@ public class PlayerTabArgument extends TabArgument {
     }
 
     @Override
-    public boolean isValid(String arg) {
+    public @Nullable String validate(String arg) {
         for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
             if (player.getName().equalsIgnoreCase(arg)) {
-                return true;
+                return null;
             }
         }
-        return false;
+        return "Player not found.";
     }
 }

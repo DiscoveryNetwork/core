@@ -1,6 +1,7 @@
 package network.discov.core.bungee.model;
 
 import net.md_5.bungee.api.CommandSender;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -23,8 +24,13 @@ public abstract class TabArgument {
         return  required;
     }
 
-    public boolean isValid(String arg) {
-        return true;
+    /**
+     * Validates a string for this TabArgument
+     * @param arg The argument to validate
+     * @return null if argument is valid, error message when invalid
+     */
+    public @Nullable String validate(String arg) {
+        return null;
     }
 
     @Override

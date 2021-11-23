@@ -34,8 +34,9 @@ public class CommandUtils {
         // Call argument validators
         for (Integer key : tabArguments.keySet()) {
             TabArgument argument = tabArguments.get(key);
-            if (!argument.isValid(args[key])) {
-                sender.sendMessage(Core.getInstance().getMessageUtil().get("validator-failed"));
+            String validateResult = argument.validate(args[key]);
+            if (validateResult != null) {
+                sender.sendMessage(Core.getInstance().getMessageUtil().get("args-validator-failed", validateResult));
                 return false;
             }
         }

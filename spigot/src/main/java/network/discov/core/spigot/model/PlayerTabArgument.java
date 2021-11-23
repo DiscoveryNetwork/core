@@ -3,6 +3,7 @@ package network.discov.core.spigot.model;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +23,12 @@ public class PlayerTabArgument extends TabArgument {
     }
 
     @Override
-    public boolean isValid(String arg) {
+    public @Nullable String validate(String arg) {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.getName().equalsIgnoreCase(arg)) {
-                return true;
+                return null;
             }
         }
-        return false;
+        return "Player not found.";
     }
 }
