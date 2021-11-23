@@ -6,8 +6,15 @@
 
     <groupId>network.discov</groupId>
     <artifactId>Core</artifactId>
+    <packaging>pom</packaging>
     <description>Core plugin/library for Discov Network</description>
     <version>1.0${revision}</version>
+
+    <modules>
+        <module>bungee</module>
+        <module>spigot</module>
+        <module>commons</module>
+    </modules>
 
     <properties>
         <revision>-SNAPSHOT</revision>
@@ -31,26 +38,6 @@
     </repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.15.2-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.md-5</groupId>
-            <artifactId>bungeecord-api</artifactId>
-            <version>1.16-R0.4</version>
-            <scope>provided</scope>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>net.md-5</groupId>
-            <artifactId>bungeecord-api</artifactId>
-            <version>1.16-R0.3</version>
-            <scope>provided</scope>
-            <type>javadoc</type>
-        </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
@@ -90,20 +77,6 @@
                 </executions>
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
-                    <relocations>
-                        <relocation>
-                            <pattern>redis.clients</pattern>
-                            <shadedPattern>network.discov.core.dependencies.redis</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>org.json.simple</pattern>
-                            <shadedPattern>network.discov.core.dependencies.json</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>org.ocpsoft.prettytime</pattern>
-                            <shadedPattern>network.discov.core.dependencies.prettytime</shadedPattern>
-                        </relocation>
-                    </relocations>
                 </configuration>
             </plugin>
         </plugins>
