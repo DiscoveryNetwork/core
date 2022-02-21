@@ -6,10 +6,10 @@ import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 import network.discov.core.bungee.model.BungeeComponent;
 import network.discov.core.bungee.util.BungeeMessageUtil;
-import network.discov.core.commons.CommonUtils;
-import network.discov.core.commons.DatabaseConnector;
-import network.discov.core.commons.MessageUtil;
-import network.discov.core.commons.PersistentStorage;
+import network.discov.core.commons.utils.CommonUtils;
+import network.discov.core.commons.utils.DatabaseConnector;
+import network.discov.core.commons.utils.MessageUtil;
+import network.discov.core.commons.utils.PersistentStorage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

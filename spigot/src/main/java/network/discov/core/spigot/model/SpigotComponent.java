@@ -1,7 +1,7 @@
 package network.discov.core.spigot.model;
 
-import network.discov.core.commons.CoreComponent;
-import network.discov.core.commons.PersistentStorage;
+import network.discov.core.commons.framework.CoreComponent;
+import network.discov.core.commons.utils.PersistentStorage;
 import network.discov.core.spigot.Core;
 import org.bukkit.Bukkit;
 import org.bukkit.command.SimpleCommandMap;

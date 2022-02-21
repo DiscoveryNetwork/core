@@ -5,7 +5,7 @@ import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 import network.discov.core.bungee.Core;
-import network.discov.core.commons.MessageUtil;
+import network.discov.core.commons.utils.MessageUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

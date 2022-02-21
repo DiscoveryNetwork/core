@@ -1,6 +1,6 @@
 package network.discov.core.spigot.util;
 
-import network.discov.core.commons.MessageUtil;
+import network.discov.core.commons.utils.MessageUtil;
 import network.discov.core.spigot.Core;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;

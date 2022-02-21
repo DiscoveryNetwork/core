@@ -1,5 +1,7 @@
-package network.discov.core.commons;
+package network.discov.core.commons.framework;
 
+import network.discov.core.commons.utils.DataUtil;
+import network.discov.core.commons.utils.PersistentStorage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

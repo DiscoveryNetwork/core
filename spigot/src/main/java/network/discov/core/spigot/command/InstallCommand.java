@@ -1,6 +1,6 @@
 package network.discov.core.spigot.command;
 
-import network.discov.core.commons.NexusClient;
+import network.discov.core.commons.utils.NexusClient;
 import network.discov.core.commons.exception.ArtifactNotFoundException;
 import network.discov.core.commons.exception.InvalidResponseCodeException;
 import network.discov.core.spigot.Core;

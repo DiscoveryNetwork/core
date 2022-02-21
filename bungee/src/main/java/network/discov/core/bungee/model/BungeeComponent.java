@@ -6,8 +6,8 @@ import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 import network.discov.core.bungee.Core;
-import network.discov.core.commons.CoreComponent;
-import network.discov.core.commons.PersistentStorage;
+import network.discov.core.commons.framework.CoreComponent;
+import network.discov.core.commons.utils.PersistentStorage;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

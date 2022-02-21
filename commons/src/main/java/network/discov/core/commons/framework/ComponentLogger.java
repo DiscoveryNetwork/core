@@ -1,4 +1,4 @@
-package network.discov.core.commons;
+package network.discov.core.commons.framework;
 
 import org.jetbrains.annotations.NotNull;
 

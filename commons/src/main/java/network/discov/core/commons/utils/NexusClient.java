@@ -1,4 +1,4 @@
-package network.discov.core.commons;
+package network.discov.core.commons.utils;
 
 import network.discov.core.commons.exception.ArtifactNotFoundException;
 import network.discov.core.commons.exception.InvalidResponseCodeException;
